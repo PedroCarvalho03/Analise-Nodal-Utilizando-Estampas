@@ -87,7 +87,7 @@ class Estampa():
         Gn[b][y] += -1
         Gn[c][x] += 1
         Gn[d][x] += -1
-        Gn[x][c] += -1
+        Gn[x][c] += -1 rem
         Gn[x][d] += 1
         Gn[y][a] += -1
         Gn[y][b] += 1
