@@ -8,18 +8,24 @@ class Estampa():
         Gn[a][b] += -1/R
         Gn[b][a] += -1/R
         Gn[b][b] += 1/R
-    
+        return Gn
+
     @staticmethod
     def fonteCorrenteControladaTensão(Gm,a,b,c,d,Gn):
         Gn[a][c] += Gm
         Gn[a][d] += -Gm
         Gn[b][c] += -Gm
         Gn[b][d] += Gm
+        return Gn
     
     @staticmethod
     def fonteCorrente(I,a,b,In):
-        In[a] = -I
-        In[b] = I
+        '''
+        a->b
+        '''
+        In[a] -= I
+        In[b] += I
+        return In
 
     @staticmethod
     def capacitor(C,omega,a,b,Gn):
@@ -61,6 +67,7 @@ class Estampa():
         Gn[x][a] += -1
         Gn[x][b] += 1
         In[x] += -V
+        return Gn,In
     
     @staticmethod
     def fonteTensaoControladaTensao(A,x,a,b,c,d,Gn):
@@ -87,17 +94,63 @@ class Estampa():
         Gn[b][y] += -1
         Gn[c][x] += 1
         Gn[d][x] += -1
-        Gn[x][c] += -1 rem
+        Gn[x][c] += -1 
         Gn[x][d] += 1
         Gn[y][a] += -1
         Gn[y][b] += 1
         Gn[y][x] += Rm
         
     
-        
-    
-    
+    @staticmethod
+    def resistorQuadratico(e,a,b,Gn,In):
+        '''
+        a -> Nó Positivo,
+        b -> Nó Negativo
+        '''
+        G0 = 2*(e[a]-e[b])
+        I0 = (e[a]-e[b])**2 - G0*(e[a]-e[b])
 
+        G = Estampa.resistor(1/G0,a,b,Gn)
+        I = Estampa.fonteCorrente(I0,a,b,In)
+        
+        return G,I
     
+    @staticmethod
+    def fonteCorrenteControladaTensaoLinearizado(e,a,b,c,d,Gn,In):
+        '''
+        a -> b,
+        c -> Controle +
+        d -> Controle -
+        '''
+
+        Gm = -1/(e[c]-e[d])**2
+        I0 = 1/(e[c]-e[d]) - Gm*(e[c]-e[d])
+
+        G = Estampa.fonteCorrenteControladaTensão(Gm,a,b,c,d,Gn)
+        I = Estampa.fonteCorrente(I0,a,b,In)
+
+        return G,I
+
+    @staticmethod
+    def capacitorBE(c,deltaT,v0,a,b,Gn,In):
+        '''noA(+) o-||-o noB(-)'''
+        G = Estampa.resistor(deltaT/c,a,b,Gn)
+        I = Estampa.fonteCorrente(c/deltaT*v0,b,a,In)
+        return G,I
+
+    @staticmethod
+    def capacitorFE(c,deltaT,v0,i0,x,a,b,Gn,In):
+        '''noA(+) o-||-o noB(-)'''
+        Gn[a,x] += 1
+        Gn[b,x] -= 1
+
+        Gn[x,a] += 1
+        Gn[x,b] -= 1
+
+        In[x] += v0+deltaT/c*i0
+        
+        return Gn,In
+
+        
         
     
